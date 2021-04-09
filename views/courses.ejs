@@ -1,0 +1,18 @@
+<div class="container">
+    <div class="col-sm-6">
+        <img src="/public/images/fruit.jpg">
+
+    </div>
+    <div class="col-sm-6">
+        <h1>List of Courses</h1>
+        <% offeredCourses.forEach(course=> { %>
+            <h5>
+                <%= course.title %>
+            </h5>
+            <span>
+                $ <%= course.cost %>
+            </span>
+
+           <% }); %>
+    </div>
+</div>
