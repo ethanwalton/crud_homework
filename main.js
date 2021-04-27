@@ -6,6 +6,12 @@ subscribersController = require("./controllers/subscribersController"),
 usersController = require("./controllers/usersController"),
 coursesController = require("./controllers/coursesController"),
 methodOverride = require("method-override"),
+passport =require("passport"),
+cookieParser = require("cookie-parser"),
+expressSession = require("express-session"),
+expressValidator = require("express-validator"),
+connectFlash = require("connect-flash"),
+User = require("./models/user")
 layouts = require("express-ejs-layouts");
 
 const mongoose = require("mongoose");
@@ -25,7 +31,8 @@ router.get("/", (req, res) => {
 
 
    
-router.use(express.static("public"))
+router.use(express.static("public"));
+router.use(expressValidator());
 app.use(
     express.urlencoded({
         extended: false
@@ -34,6 +41,32 @@ app.use(
 
 router.use(express.json());
 router.use(methodOverride("_method", {methods: ["POST", "GET"]}));
+
+
+router.use(cookieParser("my_passcode"));
+router.use(expressSession({
+    secret: "my_passcode",
+    cookie: {
+        maxAge: 360000
+    },
+    resave: false,
+    saveUnitialized: false
+
+}));
+
+router.use(connectFlash());
+
+router.use(passport.initialize());
+router.use(passport.session());
+passport.use(User.createStrategy());
+passport.serializeUser(User.serializeUser);
+passport.deserializeUser(User.deserializeUser);
+
+router.use((req, res, next) => {
+    res.locals.flashMessages = req.flash();
+    res.locals.loggedIn = req.isUnauthenticated();
+    res.locals.currentUser = req.user;
+})
 
 router.get("/", homeController.index);
 
@@ -56,10 +89,16 @@ router.delete("/courses/:id/delete", coursesController.delete, coursesController
 
 router.get("/users", usersController.index, usersController.indexView);
 router.get("/users/new", usersController.new);
-router.post("/users/create", usersController.create, usersController.redirectView);
+router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView);
+
+router.get("/users/login", usersController.login);
+router.post("/users/login", usersController.authenticate);
+router.get("/users/logout", usersController.logout, usersController.redirectView);
+
 router.get("/users/:id", usersController.show, usersController.showView);
 router.get("/users/:id/edit", usersController.edit);
-router.put("/users/:id/update", usersController.update, usersController.redirectView);
+
+router.put("/users/:id/update", usersController.validate, usersController.update, usersController.redirectView);
 router.delete("/users/:id/delete", usersController.delete, usersController.redirectView);
 
 
