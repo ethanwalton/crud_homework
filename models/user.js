@@ -2,6 +2,7 @@ const { TOO_MANY_REQUESTS } = require("http-status-codes")
 const mongoose = require("mongoose"), 
 { Schema } = require ("mongoose"), 
 Subscriber = require("./subscriber")
+Course = require("./course")
 userSchema = new Schema(
     {
         name: {

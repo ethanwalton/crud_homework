@@ -1,6 +1,6 @@
 "use strict";
 
-const Course = require("../models/Course");
+const Course = require("../models/course");
 
 module.exports = {
     index: (req, res, next) => {

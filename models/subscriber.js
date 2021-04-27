@@ -1,7 +1,8 @@
-"use strict";
-
-const mongoose = require("mongoose"),
-    subscriberSchema = mongoose.Schema({
+const { TOO_MANY_REQUESTS } = require("http-status-codes")
+const mongoose = require("mongoose"), 
+{ Schema } = require ("mongoose"), 
+Course = require("./course")
+subscriberSchema = new Schema({
         name: {
             type: String,
             required: true

@@ -14,7 +14,7 @@ courseSchema = new Schema(
         maxStudents: {
             type: Number, 
             default: 0, 
-            min = [0, "Course can not have negative num. of students"]
+            min: [0, "Course can not have negative num. of students"]
         },
         cost: {
             type: Number, 
@@ -25,6 +25,6 @@ courseSchema = new Schema(
     {
         timestamps: true
     }
-)
+);
 
 module.exports = mongoose.model("Course", courseSchema);
