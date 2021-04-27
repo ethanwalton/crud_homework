@@ -11,7 +11,7 @@ courseSchema = new Schema(
             type: String,
             required: true
         },
-        maxStudnets: {
+        maxStudents: {
             type: Number, 
             default: 0, 
             min = [0, "Course can not have negative num. of students"]

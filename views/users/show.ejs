@@ -1,0 +1,34 @@
+<h2 class="center"> User Data for <%= user.name.first user.name.last %></h2>
+<table class="table">
+    <tbody>
+        
+            <tr>
+                <td>Name</td>
+                <td>
+                    <%= user.name.first user.name.last %>
+                </td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td>
+                    <%= user.email %>
+                </td>
+            </tr>
+            <tr>
+                <td>Zip Code:</td>
+                <td>
+                    <%= user.zipcode %>
+                </td>
+            </tr>
+            <tr>
+                <td>Num of courses</td>
+                <td><%= user.courses.length %></td>
+            </tr>
+            <tr>
+                <td>Account:</td>
+                <td>
+                    <%= user.subscribedAccount %>
+                </td>
+            </tr>
+    </tbody>
+</table>
