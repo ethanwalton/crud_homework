@@ -17,6 +17,7 @@ module.exports = {
         Course.find()
         .then(courses => {
             res.locals.courses = courses;
+            res.locals.courses = "/courses";
             next()
         })
         .catch(error => {
