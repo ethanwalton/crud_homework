@@ -1,6 +1,16 @@
 "use strict";
 
-const Course = require("../models/course");
+const Course = require("../models/course"),
+httpStatus = require("http-status-codes"),
+User = require("../models/user"),
+    getCourseParams = body => {
+        return {
+            title: body.title,
+            description: body.description,
+            maxStudents: body.maxStudents,
+            cost: body.cost
+        };
+    };
 
 module.exports = {
     index: (req, res, next) => {
@@ -21,13 +31,8 @@ module.exports = {
         res.render("/courses/new");
     }, 
     create: (req, res, next) => {
-        let newCourse = new Course({
-            title: req.body.title,
-            description: req.body.description, 
-            maxStudent: req.body.maxStudent,
-            cost: req.body.cost
-        });
-        course.create(newCourse)
+        let courseParams = getCourseParams(req.body);
+        course.create(n=courseParams)
         .then( course => {
             res.locals.course = course;
             res.locals.redirect = "/courses";
@@ -64,7 +69,7 @@ module.exports = {
             res.render("/courses/edit", {course: course});
         })
         .catch(error => {
-            console.log(`Error fetching subsirber by ID: ${error.message}`);
+            console.log(`Error fetching subscriber by ID: ${error.message}`);
             next(error);
         })
     },
@@ -92,12 +97,70 @@ module.exports = {
         let courseId = req.params.id;
         Course.findByIdAndRemove(courseId)
         .then(() => {
-            res.locals.redirect = `/courses`;
+            res.locals.redirect = "/courses";
             next();
         })
         .catch(error => {
             console.log(`Error fetching Course by ID: ${error.message}`);
             next(error);
         });
-    }
-} 
+    },
+    respondJSON: (req, res) => {
+        res.json({
+          status: httpStatus.OK,
+          data: res.locals
+        });
+      },
+      errorJSON: (error, req, res, next) => {
+        let errorObject;
+      
+        if (error) {
+          errorObject = {
+            status: httpStatus.INTERNAL_SERVER_ERROR,
+            message: error.message
+          };
+        } else {
+          errorObject = {
+            status: httpStatus.OK,
+            message: "Unknown Error."
+          };
+        }
+        res.json(errorObject);
+      },
+      filterUserCourses: (req, res, next) => {
+        let currentUser = res.locals.currentUser;
+        if (currentUser) {
+          let mappedCourses = res.locals.courses.map((course) => {
+            let userJoined = currentUser.courses.some((userCourse) => {
+              return userCourse.equals(course._id);
+            });
+            return Object.assign(course.toObject(), {joined: userJoined});
+          });
+          res.locals.courses = mappedCourses;
+          next();
+        } else {
+          next();
+        }
+      },
+      join: (req, res, next) => {
+        let courseId = req.params.id,
+          currentUser = req.user;
+      
+        if (currentUser) {
+          User.findByIdAndUpdate(currentUser, {
+            $addToSet: {
+              courses: courseId
+            }
+          })
+            .then(() => {
+              res.locals.success = true;
+              next();
+            })
+            .catch(error => {
+              next(error);
+            });
+        } else {
+          next(new Error("User must log in."));
+        }
+      },
+};

@@ -1,5 +1,5 @@
 const express = require("express"), app = express(),
-router = express.Router(),
+router = require("./routes/index"),
 homeController = require("./controllers/homeController"),
 errorController = require("./controllers/errorController"),
 subscribersController = require("./controllers/subscribersController"),
@@ -23,28 +23,28 @@ mongoose.set("useCreateIndex", true);
 
 app.set("port", process.env.PORT || 3000);
 app.set("view engine", "ejs");
-router.use(layouts);
+app.use(layouts);
 
-router.get("/", (req, res) => {
+app.get("/", (req, res) => {
     res.render("index");
 });
 
 
    
-router.use(express.static("public"));
-router.use(expressValidator());
+app.use(express.static("public"));
+app.use(expressValidator());
 app.use(
     express.urlencoded({
         extended: false
     })
 );
 
-router.use(express.json());
-router.use(methodOverride("_method", {methods: ["POST", "GET"]}));
+app.use(express.json());
+app.use(methodOverride("_method", {methods: ["POST", "GET"]}));
 
 
-router.use(cookieParser("my_passcode"));
-router.use(expressSession({
+app.use(cookieParser("my_passcode"));
+app.use(expressSession({
     secret: "my_passcode",
     cookie: {
         maxAge: 360000
@@ -54,56 +54,20 @@ router.use(expressSession({
 
 }));
 
-router.use(connectFlash());
+app.use(connectFlash());
 
-router.use(passport.initialize());
-router.use(passport.session());
+app.use(passport.initialize());
+app.use(passport.session());
 passport.use(User.createStrategy());
 passport.serializeUser(User.serializeUser);
 passport.deserializeUser(User.deserializeUser);
 
-router.use((req, res, next) => {
+app.use((req, res, next) => {
     res.locals.flashMessages = req.flash();
     res.locals.loggedIn = req.isUnauthenticated();
     res.locals.currentUser = req.user;
-})
+});
 
-router.get("/", homeController.index);
-
-
-router.get("/subscribers", subscribersController.index, subscribersController.indexView);
-router.get("/subscribers/new", subscribersController.new);
-router.post("/subscribers/create", subscribersController.create, subscribersController.redirectView);
-router.get("/subscribers/:id", subscribersController.show, subscribersController.showView);
-router.get("/subscribers/:id/edit", subscribersController.edit);
-router.put("/subscribers/:id/update", subscribersController.update, subscribersController.redirectView);
-router.delete("/subscribers/:id/delete", subscribersController.delete, subscribersController.redirectView);
-
-router.get("/courses", coursesController.index, coursesController.indexView);
-router.get("/courses/new", coursesController.new);
-router.post("/courses/create", coursesController.create, coursesController.redirectView);
-router.get("/courses/:id", coursesController.show, coursesController.showView);
-router.get("/courses/:id/edit", coursesController.edit);
-router.put("/courses/:id/update", coursesController.update, coursesController.redirectView);
-router.delete("/courses/:id/delete", coursesController.delete, coursesController.redirectView);
-
-router.get("/users", usersController.index, usersController.indexView);
-router.get("/users/new", usersController.new);
-router.post("/users/create", usersController.validate, usersController.create, usersController.redirectView);
-
-router.get("/users/login", usersController.login);
-router.post("/users/login", usersController.authenticate);
-router.get("/users/logout", usersController.logout, usersController.redirectView);
-
-router.get("/users/:id", usersController.show, usersController.showView);
-router.get("/users/:id/edit", usersController.edit);
-
-router.put("/users/:id/update", usersController.validate, usersController.update, usersController.redirectView);
-router.delete("/users/:id/delete", usersController.delete, usersController.redirectView);
-
-
-router.use(errorController.pageNotFoundError);
-router.use(errorController.internalServerError);
 
 app.use("/", router);
 
